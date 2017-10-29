@@ -1,12 +1,11 @@
 {
   "name": "conway-game-of-life",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "My own \"Conway's Game of Life\" implementation",
   "main": "index.js",
   "scripts": {
     "test": "jest --watchAll",
-    "start": "http-server -p 8000",
-    "webpack": "webpack"
+    "start": "webpack-dev-server --progress --colors"
   },
   "repository": {
     "type": "git",
@@ -30,9 +29,9 @@
     "babel-jest": "^21.2.0",
     "babel-loader": "^7.1.2",
     "babel-preset-env": "^1.6.1",
-    "http-server": "^0.10.0",
     "jest": "^21.2.1",
-    "webpack": "^3.8.1"
+    "webpack": "^3.8.1",
+    "webpack-dev-server": "^2.9.3"
   },
   "jest": {
     "rootDir": "./src",

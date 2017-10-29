@@ -5,10 +5,8 @@ export default class Game {
 	}
 
 	start() {
-		this.gamepad.render(this.gamepad.field);
-		setTimeout(() => {
-			this.nextTick();
-		}, this.dayDurationMs);
+		this.gamepad.initialRender();
+		this.nextTick();
 	}
 
 	nextTick() {
