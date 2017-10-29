@@ -1,5 +1,8 @@
 import Cell from './Cell';
 
+/**
+ * Middle layer between Model (matrix) and View (DOM)
+ */
 export default class Gamepad {
 	constructor({
 		gamepadElem,
@@ -13,6 +16,9 @@ export default class Gamepad {
 			: new Array(gamepadSize);
 	}
 
+	/**
+	 * Returns how many neighbours are alive
+	 */
 	static countNeighbours(field, rowIndex, cellIndex) {
 		let result = 0;
 		for (let i = rowIndex - 1; i <= rowIndex + 1; i++) {
@@ -34,6 +40,9 @@ export default class Gamepad {
 		return result;
 	}
 
+	/**
+	 * Returns the field which will be on the next tick
+	 */
 	static getNextDayField(field) {
 		return field.map((row, rowIndex) => {
 			return row.map((cell, cellIndex) => {
@@ -44,6 +53,9 @@ export default class Gamepad {
 		});
 	}
 
+	/**
+	 * Returns the "1/0" matrix instead of "Cells" matrix
+	 */
 	static toPrimitivesView(field) {
 		return field.map(row => {
 			return row.map(cell => {
@@ -56,6 +68,9 @@ export default class Gamepad {
 		this.gamepadElem.innerHTML = '';
 	}
 
+	/**
+	 * Model -> View formatter
+	 */
 	cellsMatrixToHtmlFragment(cellsMatrix) {
 		const fragment = document.createDocumentFragment();
 
@@ -79,20 +94,36 @@ export default class Gamepad {
 		return fragment;
 	}
 
+	/**
+	 * Update Model
+	 */
 	recalculateNextDayField(nextDayField) {
 		this.field = nextDayField;
 	}
 
+	/**
+	 * Update View
+	 */
 	render(nextDayField) {
 		const newGamepadField = this.cellsMatrixToHtmlFragment(nextDayField);
 		this.clearField();
 		this.gamepadElem.appendChild(newGamepadField);
 	}
 
+	/**
+	 * Parser from simple structure:
+	 * [                [
+	 *  [1, 0]           [aliveCellObject, deadCellObject],
+	 *  [0, 1]   --->    [deadCellObject, aliveCellObject]
+	 * ]                ]
+	 */
 	cellsMatrixToGamepadField(cellsMatrix) {
 		return cellsMatrix.map(row => row.map(cellLikeShape => new Cell(cellLikeShape)));
 	}
 
+	/**
+	 * API: runs next tick
+	 */
 	nextTick() {
 		const nextDayField = this.getNextDayField();
 		this.recalculateNextDayField(nextDayField);
