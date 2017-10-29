@@ -1,0 +1,43 @@
+{
+  "name": "conway-game-of-life",
+  "version": "0.1.0",
+  "description": "My own \"Conway's Game of Life\" implementation",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest --watch",
+    "start": "http-server -p 8000",
+    "webpack": "webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/goodwin64/conway-game-of-life.git"
+  },
+  "keywords": [
+    "Conway",
+    "Game",
+    "of",
+    "Life"
+  ],
+  "author": "goodwin64",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/goodwin64/conway-game-of-life/issues"
+  },
+  "homepage": "https://github.com/goodwin64/conway-game-of-life#readme",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.0",
+    "babel-jest": "^21.2.0",
+    "babel-loader": "^7.1.2",
+    "babel-preset-env": "^1.6.1",
+    "http-server": "^0.10.0",
+    "jest": "^21.2.1",
+    "webpack": "^3.8.1"
+  },
+  "jest": {
+    "rootDir": "./src",
+    "transform": {
+      "^.+\\.jsx?$": "babel-jest"
+    }
+  }
+}
