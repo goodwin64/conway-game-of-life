@@ -1,0 +1,33 @@
+@import url('https://fonts.googleapis.com/css?family=Saira+Semi+Condensed');
+
+body {
+    background-color: #fefefe;
+    font-family: 'Saira Semi Condensed', sans-serif;
+}
+
+#gamepad {
+    margin: auto;
+    width: 720px;
+    height: 480px;
+    border: 3px solid;
+}
+
+.game-title {
+    text-align: center;
+    font-size: 3rem;
+}
+
+.cell {
+    width: 20px;
+    height: 20px;
+    background-color: #fefefe;
+    float: left;
+}
+.cell.is-alive {
+    background-color: #444;
+}
+
+.row {
+    clear: both;
+    overflow: hidden;
+}
