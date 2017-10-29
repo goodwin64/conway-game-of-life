@@ -1,5 +1,8 @@
 import Cell from './Cell';
 
+/**
+ * Middle layer between Model (matrix) and View (DOM)
+ */
 export default class Gamepad {
 	constructor({
 		gamepadElem,
@@ -8,25 +11,28 @@ export default class Gamepad {
 	}) {
 		this.gamepadElem = gamepadElem;
 		this.field = cellsMatrix
-			// ? this.cellsMatrixToGamepadField(cellsMatrix)
-			? cellsMatrix
+			? this.primitivesToCellsMatrix(cellsMatrix)
 			: new Array(gamepadSize);
 	}
 
+	/**
+	 * Returns how many neighbours are alive
+	 * Works with both fields: "of Primitives" and "of Cells"
+	 */
 	static countNeighbours(field, rowIndex, cellIndex) {
 		let result = 0;
 		for (let i = rowIndex - 1; i <= rowIndex + 1; i++) {
-			// TODO optimize: if beyond the edge - ignore loop iteration
+			let isBeyondEdge = i < 0 || i >= field.length;
+			if (isBeyondEdge) continue;
+
 			for (let j = cellIndex - 1; j <= cellIndex + 1; j++) {
 				const isMyCellNow = i === rowIndex && j === cellIndex;
-				if (isMyCellNow) {
-					continue;
-				}
+				let isBeyondEdge = j < 0 || j >= field[0].length;
+				if (isMyCellNow || isBeyondEdge) continue;
 
 				const currRow = field[i];
-				const currNeighbour = currRow && currRow[j];
-				// if (currNeighbour instanceof Cell && currNeighbour.isAlive) {
-				if (Number.isInteger(currNeighbour) && currNeighbour) {
+				const currNeighbour = currRow && currRow[j] && new Cell(currRow[j]);
+				if (currNeighbour.isAlive) {
 					result++;
 				}
 			}
@@ -34,16 +40,22 @@ export default class Gamepad {
 		return result;
 	}
 
+	/**
+	 * Returns the field which will be on the next tick
+	 */
 	static getNextDayField(field) {
 		return field.map((row, rowIndex) => {
 			return row.map((cell, cellIndex) => {
-				const neighboursCount = this.countNeighbours(rowIndex, cellIndex);
+				const neighboursCount = this.countNeighbours(field, rowIndex, cellIndex);
 				const nextLifeStatus = Cell.getNextLifeStatus(cell, neighboursCount);
 				return new Cell(nextLifeStatus);
 			});
 		});
 	}
 
+	/**
+	 * Returns the "1/0" matrix instead of "Cells" matrix
+	 */
 	static toPrimitivesView(field) {
 		return field.map(row => {
 			return row.map(cell => {
@@ -56,6 +68,9 @@ export default class Gamepad {
 		this.gamepadElem.innerHTML = '';
 	}
 
+	/**
+	 * Model -> View formatter
+	 */
 	cellsMatrixToHtmlFragment(cellsMatrix) {
 		const fragment = document.createDocumentFragment();
 
@@ -79,20 +94,36 @@ export default class Gamepad {
 		return fragment;
 	}
 
+	/**
+	 * Update Model
+	 */
 	recalculateNextDayField(nextDayField) {
 		this.field = nextDayField;
 	}
 
+	/**
+	 * Update View
+	 */
 	render(nextDayField) {
 		const newGamepadField = this.cellsMatrixToHtmlFragment(nextDayField);
 		this.clearField();
 		this.gamepadElem.appendChild(newGamepadField);
 	}
 
-	cellsMatrixToGamepadField(cellsMatrix) {
+	/**
+	 * Parser from simple structure:
+	 * [                [
+	 *  [1, 0]           [aliveCellObject, deadCellObject],
+	 *  [0, 1]   --->    [deadCellObject, aliveCellObject]
+	 * ]                ]
+	 */
+	primitivesToCellsMatrix(cellsMatrix) {
 		return cellsMatrix.map(row => row.map(cellLikeShape => new Cell(cellLikeShape)));
 	}
 
+	/**
+	 * API: runs next tick
+	 */
 	nextTick() {
 		const nextDayField = this.getNextDayField();
 		this.recalculateNextDayField(nextDayField);
