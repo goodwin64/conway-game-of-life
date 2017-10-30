@@ -11,7 +11,7 @@ export default class Gamepad {
 	}) {
 		this.gamepadElem = gamepadElem;
 		this.field = cellsMatrix
-			? this.primitivesToCellsMatrix(cellsMatrix)
+			? Gamepad.primitivesToCells(cellsMatrix)
 			: new Array(gamepadSize);
 	}
 
@@ -30,8 +30,7 @@ export default class Gamepad {
 				let isBeyondEdge = j < 0 || j >= field[0].length;
 				if (isMyCellNow || isBeyondEdge) continue;
 
-				const currRow = field[i];
-				const currNeighbour = currRow && currRow[j] && new Cell(currRow[j]);
+				const currNeighbour = new Cell(field[i][j]);
 				if (currNeighbour.isAlive) {
 					result++;
 				}
@@ -46,9 +45,9 @@ export default class Gamepad {
 	static getNextDayField(field) {
 		return field.map((row, rowIndex) => {
 			return row.map((cell, cellIndex) => {
-				const neighboursCount = this.countNeighbours(field, rowIndex, cellIndex);
+				const neighboursCount = Gamepad.countNeighbours(field, rowIndex, cellIndex);
 				const nextLifeStatus = Cell.getNextLifeStatus(cell, neighboursCount);
-				return new Cell(nextLifeStatus);
+				return new Cell(nextLifeStatus, cell.cellElem);
 			});
 		});
 	}
@@ -56,7 +55,7 @@ export default class Gamepad {
 	/**
 	 * Returns the "1/0" matrix instead of "Cells" matrix
 	 */
-	static toPrimitivesView(field) {
+	static cellsToPrimitives(field) {
 		return field.map(row => {
 			return row.map(cell => {
 				return Number(cell.isAlive);
@@ -64,8 +63,15 @@ export default class Gamepad {
 		});
 	}
 
-	clearField() {
-		this.gamepadElem.innerHTML = '';
+	/**
+	 * Parser from simple structure:
+	 * [                [
+	 *  [1, 0]           [aliveCellObject, deadCellObject],
+	 *  [0, 1]   --->    [deadCellObject, aliveCellObject]
+	 * ]                ]
+	 */
+	static primitivesToCells(field) {
+		return field.map(row => row.map(cellLikeShape => new Cell(cellLikeShape)));
 	}
 
 	/**
@@ -81,8 +87,7 @@ export default class Gamepad {
 			row.forEach(cell => {
 				const cellElem = document.createElement('div');
 				cellElem.classList.add('cell');
-				// if (cell.isAlive) {
-				if (cell) {
+				if (cell.isAlive) {
 					cellElem.classList.add('is-alive');
 				}
 				rowElem.appendChild(cellElem);
@@ -102,31 +107,37 @@ export default class Gamepad {
 	}
 
 	/**
-	 * Update View
+	 * Renders the field first time: fill View from Model
 	 */
-	render(nextDayField) {
-		const newGamepadField = this.cellsMatrixToHtmlFragment(nextDayField);
-		this.clearField();
-		this.gamepadElem.appendChild(newGamepadField);
+	initialRender() {
+		this.field.forEach(row => {
+			const rowElem = document.createElement('div');
+			rowElem.classList.add('row');
+
+			row.forEach(cell => {
+				rowElem.appendChild(cell.cellElem);
+			});
+
+			this.gamepadElem.appendChild(rowElem);
+		});
 	}
 
 	/**
-	 * Parser from simple structure:
-	 * [                [
-	 *  [1, 0]           [aliveCellObject, deadCellObject],
-	 *  [0, 1]   --->    [deadCellObject, aliveCellObject]
-	 * ]                ]
+	 * Update existing View
 	 */
-	primitivesToCellsMatrix(cellsMatrix) {
-		return cellsMatrix.map(row => row.map(cellLikeShape => new Cell(cellLikeShape)));
+	render() {
+		const cells = [].concat.apply([], this.field);
+		cells.forEach(cell => {
+			cell.updateCellElem();
+		});
 	}
 
 	/**
 	 * API: runs next tick
 	 */
 	nextTick() {
-		const nextDayField = this.getNextDayField();
+		const nextDayField = Gamepad.getNextDayField(this.field);
 		this.recalculateNextDayField(nextDayField);
-		this.render(nextDayField);
+		this.render();
 	}
 }
